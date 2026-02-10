@@ -7,6 +7,8 @@ import { ItemDetailView } from './components/ItemDetailView';
 
 type ViewMode = 'pulse' | 'library';
 
+const PLAY_IMAGE_URL = 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&q=80&w=1200';
+
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('pulse');
   const [selectedAge, setSelectedAge] = useState(6);
@@ -106,13 +108,55 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-gray-900 selection:bg-blue-100 selection:text-blue-900">
-      <header className="pt-16 pb-8 px-4 text-center">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 mb-6">TinySteps</h1>
-        <div className="inline-flex p-1 bg-gray-100 rounded-2xl shadow-inner border border-gray-200/50">
-          <button onClick={() => setViewMode('pulse')} className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all ${viewMode === 'pulse' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>Pulse</button>
-          <button onClick={() => setViewMode('library')} className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all ${viewMode === 'library' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}>Library</button>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-20 lg:py-32 flex flex-col lg:flex-row items-center gap-16">
+          <div className="flex-1 space-y-8 text-center lg:text-left animate-in fade-in slide-in-from-left-8 duration-1000">
+            <h1 className="text-7xl md:text-9xl tracking-tighter text-gray-900 leading-[0.85]">
+              <span className="font-black">Tiny</span>
+              <span className="font-serif-brand italic font-medium text-blue-600 block sm:inline sm:ml-2">Steps</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-500 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              Every leap, every giggle, every milestone—curated for your child's specific age and development.
+            </p>
+          </div>
+          
+          <div className="flex-1 w-full lg:max-w-xl animate-in fade-in slide-in-from-right-8 duration-1000 delay-200">
+            <div className="relative group">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-[4rem] blur-2xl group-hover:from-blue-500/20 transition-all duration-700" />
+              <div className="relative aspect-[4/3] bg-gray-100 rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white">
+                <img 
+                  src={PLAY_IMAGE_URL} 
+                  alt="Child exploring"
+                  className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 text-white">
+                  <p className="text-sm font-bold">"Development is a journey, not a race. We provide the map."</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </header>
+      </section>
+
+      {/* View Mode Switcher (Centered below Hero) */}
+      <div className="flex justify-center -mt-8 relative z-30 mb-16">
+        <div className="inline-flex p-1.5 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
+          <button 
+            onClick={() => setViewMode('pulse')} 
+            className={`px-10 py-3 rounded-xl text-sm font-black transition-all ${viewMode === 'pulse' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            Pulse
+          </button>
+          <button 
+            onClick={() => setViewMode('library')} 
+            className={`px-10 py-3 rounded-xl text-sm font-black transition-all ${viewMode === 'library' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            Library
+          </button>
+        </div>
+      </div>
 
       {viewMode === 'pulse' ? (
         <>
@@ -229,7 +273,7 @@ const App: React.FC = () => {
         </>
       ) : (
         <main className="max-w-5xl mx-auto px-6 py-12">
-          <div className="flex flex-wrap justify-center gap-3 mb-20">
+          <div className="flex flex-wrap justify-center gap-3 mb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {categories.map(cat => (
               <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all ${activeCategory === cat ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 scale-105' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-300'}`}>
                 {cat}
