@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ALL_ITEMS } from './data';
 import { AGE_GROUPS, Item } from './types';
 import { MilestoneCard } from './components/MilestoneCard';
@@ -15,10 +15,29 @@ const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [viewingItem, setViewingItem] = useState<Item | null>(null);
+  const [isHeaderStuck, setIsHeaderStuck] = useState(false);
   
   const maxAge = 72;
   const sliderRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const thumbSize = 28;
+
+  // Use IntersectionObserver for precise "stuck" detection
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When the sentinel is not intersecting, the header below it has hit the top
+        setIsHeaderStuck(!entry.isIntersecting);
+      },
+      { threshold: [0], rootMargin: '0px 0px 0px 0px' }
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const categories = useMemo(() => 
     Array.from(new Set(ALL_ITEMS.map(item => item.category))).sort(), 
@@ -82,7 +101,7 @@ const App: React.FC = () => {
   };
 
   const renderMarkers = () => (
-    <div className="absolute top-3.5 left-0 right-0 h-3 pointer-events-none">
+    <div className={`absolute left-0 right-0 h-3 pointer-events-none transition-all duration-500 ${isHeaderStuck ? 'top-1' : 'top-3.5'}`}>
       <div className="relative w-full h-full">
         {changePoints.map(point => {
           const isActive = point === selectedAge;
@@ -141,7 +160,7 @@ const App: React.FC = () => {
       </section>
 
       {/* View Mode Switcher (Centered below Hero) */}
-      <div className="flex justify-center -mt-8 relative z-30 mb-16">
+      <div className="flex justify-center -mt-8 relative z-30 mb-6">
         <div className="inline-flex p-1.5 bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100">
           <button 
             onClick={() => setViewMode('pulse')} 
@@ -160,21 +179,42 @@ const App: React.FC = () => {
 
       {viewMode === 'pulse' ? (
         <>
-          <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 py-8 px-4 shadow-sm transition-all animate-in fade-in slide-in-from-top-4">
+          {/* Sentinel for sticky header detection */}
+          <div ref={sentinelRef} className="h-px w-full pointer-events-none" />
+          
+          <div className={`sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 px-4 shadow-sm transition-all duration-500 animate-in fade-in slide-in-from-top-4 ${isHeaderStuck ? 'py-3' : 'pt-2 pb-10'}`}>
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-end justify-between mb-8">
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1 block">Current Viewpoint</span>
-                  <div className="text-5xl font-black tabular-nums text-gray-900 tracking-tighter">{displayAge()}</div>
+              <div className={`flex items-end justify-between transition-all duration-500 ${isHeaderStuck ? 'mb-2' : 'mb-8'}`}>
+                <div className="flex flex-row items-baseline gap-4">
+                  {!isHeaderStuck && (
+                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1 block transition-all">Current Viewpoint</span>
+                  )}
+                  <div className={`font-black tabular-nums text-gray-900 tracking-tighter transition-all duration-500 ${isHeaderStuck ? 'text-2xl' : 'text-5xl'}`}>
+                    {displayAge()}
+                  </div>
+                  {isHeaderStuck && (
+                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 transition-all opacity-60">Viewpoint</span>
+                  )}
                 </div>
               </div>
-              <div className="relative pt-6 pb-8" ref={sliderRef}>
-                <div className="absolute top-[-10px] z-20 pointer-events-none transition-all duration-75 flex flex-col items-center" style={{ left: getThumbCenter(selectedAge), transform: `translateX(-50%)` }}>
-                  <div className={`px-2 py-1 bg-blue-600 text-white text-[11px] font-black rounded-full shadow-lg transition-transform ${isDragging ? 'scale-125' : 'scale-100'}`}>{selectedAge}m</div>
-                  <div className="w-1.5 h-1.5 bg-blue-600 rotate-45 -mt-0.5 shadow-lg" />
-                </div>
+              <div className={`relative transition-all duration-500 ${isHeaderStuck ? 'pt-2 pb-2' : 'pt-6 pb-8'}`} ref={sliderRef}>
+                {!isHeaderStuck && (
+                  <div className={`absolute z-20 pointer-events-none transition-all duration-300 flex flex-col items-center top-[-10px]`} style={{ left: getThumbCenter(selectedAge), transform: `translateX(-50%)` }}>
+                    <div className={`px-2 py-0.5 bg-blue-600 text-white text-[10px] font-black rounded-full shadow-lg transition-transform ${isDragging ? 'scale-125' : 'scale-100'}`}>{selectedAge}m</div>
+                    <div className="w-1.5 h-1.5 bg-blue-600 rotate-45 -mt-0.5 shadow-lg" />
+                  </div>
+                )}
                 {renderMarkers()}
-                <input type="range" min="0" max={maxAge} value={selectedAge} onMouseDown={() => setIsDragging(true)} onMouseUp={() => setIsDragging(false)} onChange={(e) => setSelectedAge(parseInt(e.target.value))} className="relative z-10 w-full h-3 bg-gray-100/50 rounded-full appearance-none cursor-pointer focus:outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[5px] [&::-webkit-slider-thumb]:border-blue-600 shadow-lg" />
+                <input 
+                  type="range" 
+                  min="0" 
+                  max={maxAge} 
+                  value={selectedAge} 
+                  onMouseDown={() => setIsDragging(true)} 
+                  onMouseUp={() => setIsDragging(false)} 
+                  onChange={(e) => setSelectedAge(parseInt(e.target.value))} 
+                  className={`relative z-10 w-full rounded-full appearance-none cursor-pointer focus:outline-none bg-gray-100/50 transition-all duration-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[5px] [&::-webkit-slider-thumb]:border-blue-600 [&::-webkit-slider-thumb]:shadow-lg ${isHeaderStuck ? 'h-1.5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5' : 'h-3 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-7'}`} 
+                />
               </div>
             </div>
           </div>
