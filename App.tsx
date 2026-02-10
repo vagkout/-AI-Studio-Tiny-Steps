@@ -141,18 +141,24 @@ const App: React.FC = () => {
                 <h2 className="text-2xl font-black text-gray-900">Milestone Spotlight</h2>
                 <div className="flex-1 h-px bg-gray-100" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {spotlightItems.map(({ item, offset }) => (
-                  <div key={item.id} className="relative flex flex-col group/card">
-                    <div className="mb-2 px-1">
-                      <span className={`text-[9px] font-black uppercase tracking-wider ${offset === 0 ? 'text-blue-600' : offset < 0 ? 'text-gray-400' : 'text-amber-500'}`}>
-                        {offset === 0 ? '● NEW THIS MONTH' : offset < 0 ? `${Math.abs(offset)}m ago` : `Coming in ${offset}m`}
-                      </span>
+              {spotlightItems.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {spotlightItems.map(({ item, offset }) => (
+                    <div key={item.id} className="relative flex flex-col group/card">
+                      <div className="mb-2 px-1">
+                        <span className={`text-[9px] font-black uppercase tracking-wider ${offset === 0 ? 'text-blue-600' : offset < 0 ? 'text-gray-400' : 'text-amber-500'}`}>
+                          {offset === 0 ? '● NEW THIS MONTH' : offset < 0 ? `${Math.abs(offset)}m ago` : `Coming in ${offset}m`}
+                        </span>
+                      </div>
+                      <MilestoneCard item={item} isNew={offset === 0} onClick={setViewingItem} className={offset < 0 ? 'opacity-60 hover:opacity-100' : ''} />
                     </div>
-                    <MilestoneCard item={item} isNew={offset === 0} onClick={setViewingItem} className={offset < 0 ? 'opacity-60 hover:opacity-100' : ''} />
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-50 border border-dashed border-gray-200 rounded-3xl py-12 text-center">
+                  <p className="text-sm font-medium text-gray-400">No specific developmental markers for this exact window.</p>
+                </div>
+              )}
             </section>
 
             {ageEssentials.length > 0 && (
@@ -235,25 +241,35 @@ const App: React.FC = () => {
             <div className="lg:col-span-2 space-y-12">
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mb-8">Developmental Timeline</h3>
               <div className="space-y-12 relative">
-                <div className="absolute left-[23px] top-0 bottom-0 w-px bg-gray-100 hidden sm:block" />
-                {libMilestones.map((item, idx) => (
-                  <div key={item.id} className="relative flex flex-col sm:flex-row gap-6 sm:gap-12 animate-in fade-in slide-in-from-left-4" style={{ animationDelay: `${idx * 100}ms` }}>
-                    <div className="flex-shrink-0 relative z-10 pt-2">
-                      <div className="w-12 h-12 rounded-full bg-white border-2 border-blue-50 flex items-center justify-center text-[10px] font-black text-blue-600 shadow-sm">{item.startAgeMonths}m</div>
-                    </div>
-                    <div onClick={() => setViewingItem(item)} className="flex-1 bg-white border border-gray-100 p-6 rounded-3xl hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer group">
-                      <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-blue-50 transition-colors">{item.icon}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600">{item.title}</h3>
+                {libMilestones.length > 0 && <div className="absolute left-[23px] top-0 bottom-0 w-px bg-gray-100 hidden sm:block" />}
+                {libMilestones.length > 0 ? (
+                  libMilestones.map((item, idx) => (
+                    <div key={item.id} className="relative flex flex-col sm:flex-row gap-6 sm:gap-12 animate-in fade-in slide-in-from-left-4" style={{ animationDelay: `${idx * 100}ms` }}>
+                      <div className="flex-shrink-0 relative z-10 pt-2">
+                        <div className="w-12 h-12 rounded-full bg-white border-2 border-blue-50 flex items-center justify-center text-[10px] font-black text-blue-600 shadow-sm">{item.startAgeMonths}m</div>
+                      </div>
+                      <div onClick={() => setViewingItem(item)} className="flex-1 bg-white border border-gray-100 p-6 rounded-3xl hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer group">
+                        <div className="flex items-start gap-4">
+                          <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-blue-50 transition-colors">{item.icon}</div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600">{item.title}</h3>
+                            </div>
+                            <p className="text-gray-500 leading-relaxed font-medium line-clamp-2">{item.description}</p>
                           </div>
-                          <p className="text-gray-500 leading-relaxed font-medium line-clamp-2">{item.description}</p>
                         </div>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="py-16 px-8 border border-dashed border-gray-200 rounded-[2.5rem] text-center bg-gray-50/30">
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm border border-gray-100">✨</div>
+                    <h4 className="text-lg font-bold text-gray-800 mb-2">Resource-Focused Category</h4>
+                    <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
+                      The <strong>{activeCategory}</strong> category is curated as a toolkit of essential items rather than specific developmental milestones. Explore the recommended resources to the right.
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
